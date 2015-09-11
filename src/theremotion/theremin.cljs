@@ -34,11 +34,11 @@
 
 (defn map-frequency
   "Map a normalised value between 0 and 1 to a frequency."
-  [val] val)
+  [x] (* x 1000))
 
 (defn map-volume
   "Map a normalised value between 0 and 1 to a volume."
-  [val] val)
+  [x] (* x 5))
 
 (defn use-pitch-chan!
   "Listen for values on chan and apply them to pitch."

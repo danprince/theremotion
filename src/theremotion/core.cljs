@@ -11,6 +11,8 @@
 (enable-console-print!)
 
 (theremin/start!)
-(theremin/use-volume-chan leap/<left)
-(theremin/use-pitch-chan leap/<right)
+
+(theremin/use-volume-chan! leap/<left)
+
+(theremin/use-pitch-chan! leap/<right)
 
