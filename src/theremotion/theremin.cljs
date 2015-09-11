@@ -3,8 +3,7 @@
   (:require [cljs.core.async :refer [<!]]
             [theremotion.osc :as osc]
             [theremotion.gain :as gain]
-            [theremotion.audio :as audio]
-            [theremotion.util :refer [dist-from-2d]]))
+            [theremotion.audio :as audio]))
 
 (def ctx  (audio/create))
 (def osc  (osc/create ctx))
@@ -14,10 +13,6 @@
 (audio/connect [osc gain out])
 
 (gain/volume gain 0)
-
-(def pitch-pos [-20 10 0])
-
-(def volume-pos [20 10 0])
 
 (def settings (atom {:pitch 0
                      :volume 1
