@@ -3,7 +3,8 @@
   (:require [cljs.core.async :refer [<!]]
             [theremotion.osc :as osc]
             [theremotion.gain :as gain]
-            [theremotion.audio :as audio]))
+            [theremotion.audio :as audio]
+            [theremotion.util :refer [dist-from-2d]]))
 
 (def ctx  (audio/create))
 (def osc  (osc/create ctx))
@@ -24,38 +25,40 @@
                      :brightness 0}))
 
 (defn adjust-settings
-  "Atomically swap the old settings for some new ones"
   [adjust]
     (swap! settings merge adjust))
 
 (defn start! []
   (osc/start osc))
 
-(defn freq! [f]
+(defn set-freq! [f]
   (osc/freq osc f))
 
-(defn volume! [l]
+(defn set-volume! [l]
   (gain/volume gain l))
 
-(defn dist-from [a b]
-  (let [sqrt (.-sqrt js/Math)
-        pow (.-pow js/Math)]
-    (sqrt (+
-            (pow (- (nth b 1) (nth a 1)) 2)
-            (pow (- (nth b 0) (nth a 0)) 2)))))
+(defn map-pitch
+  "Map a normalised value between 0 and 1 to a pitch"
+  [val] val)
 
-(defn pitch-chan [chan]
-  (go (while true
-    (let [pos (<! chan)
-          dist (dist-from pos pitch-pos)]
-      (println :pitch dist)
-      (freq! dist)))))
+(defn map-volume
+  "Map a normalised value between 0 and 1 to a volume"
+  [val] val)
 
-(defn volume-chan [chan]
-  (go (while true
-    (let [pos  (<! chan)
-          dist (dist-from pos volume-pos)
-          vol (/ (- dist 20) 100)]
-      (println :volume vol)
-      (volume! vol)))))
+(defn use-pitch-chan
+  "Listen for values on chan and apply them to pitch."
+  [chan]
+    (go (while true
+      (let [pos  (<! chan)
+            dist (dist-from-2d pos pitch-pos)]
+        (set-freq! dist)))))
+
+(defn use-volume-chan
+  "Listen for values on chan and apply them to volume."
+  [chan]
+    (go (while true
+      (let [pos  (<! chan)
+            dist (dist-from-2d pos volume-pos)
+            vol  (/ (- dist 20) 100)]
+        (set-volume! vol)))))
 
