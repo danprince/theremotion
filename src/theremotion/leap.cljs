@@ -1,1 +1,4 @@
-(ns theremotion.leap)
+(ns theremotion.leap
+  (:require [leapjs :as leapjs])
+
+
