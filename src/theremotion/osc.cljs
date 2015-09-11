@@ -11,7 +11,7 @@
 (defn wave
   "Get/set the wavetype of an oscillator."
   ([osc] (.-type osc))
-  ([osc name] (set! (.-value (.-type osc)) name)))
+  ([osc name] (set! (.-type osc) name)))
 
 (defn create
   "Creates an oscillator with some optional initial settings."

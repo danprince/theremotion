@@ -33,6 +33,11 @@
   "Extract and return the right hand from a frame."
   (partial frame->hand take-right))
 
+(defn frame->any
+  "Extract the any hand from the a frame"
+  [frame]
+    (first (.-hands frame)))
+
 (def <left
   "All left hand values will be made available on this channel."
   (chan))
@@ -46,17 +51,25 @@
   {})
 
 (defn process-frame!
-  "Every frame generated frame is passed to this function."
+  "Every frame generated is passed to this function."
   [frame]
-    (let [left (frame->left frame)
-          right (frame->right frame)
-          int-box (.-interactionBox frame)
-          normalize (.-normalizePoint int-box)
-          clamp? false]
-      (when left
-        (put! <left (normalize (.-palmPosition left) clamp?)))
-      (when right
-        (put! <right (normalize (.-palmPosition right) clamp?)))))
+    (let [hand      (frame->any frame)
+          ;left      (frame->left frame)
+          ;right     (frame->right frame)
+          int-box   (.-interactionBox frame)
+          normalize (.bind (.-normalizePoint int-box) int-box)
+          f32->arr  (.bind (.-apply js/Array) js/Array nil)
+          clamp?    false]
+      (when hand
+        (put! <left
+              (f32->arr
+                (normalize
+                  (.-tipPosition
+                    (.-indexFinger hand)) clamp?))))))
+      ;(when left
+      ;  (put! <left (f32->arr (normalize (.-tip.-indexFinger left) clamp?))))
+      ;(when right
+      ;  (put! <right (f32->arr (normalize (.-palmPosition right) clamp?))))))
 
 (.loop js/Leap
    options

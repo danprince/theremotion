@@ -14,5 +14,5 @@
 
 (theremin/use-volume-chan! leap/<left)
 
-(theremin/use-pitch-chan! leap/<right)
+(theremin/use-pitch-chan! leap/<left)
 
