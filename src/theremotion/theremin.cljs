@@ -37,28 +37,27 @@
 (defn set-volume! [l]
   (gain/volume gain l))
 
-(defn map-pitch
-  "Map a normalised value between 0 and 1 to a pitch"
+(defn map-frequency
+  "Map a normalised value between 0 and 1 to a frequency."
   [val] val)
 
 (defn map-volume
-  "Map a normalised value between 0 and 1 to a volume"
+  "Map a normalised value between 0 and 1 to a volume."
   [val] val)
 
-(defn use-pitch-chan
+(defn use-pitch-chan!
   "Listen for values on chan and apply them to pitch."
   [chan]
     (go (while true
-      (let [pos  (<! chan)
-            dist (dist-from-2d pos pitch-pos)]
-        (set-freq! dist)))))
+      (let [[x y z] (<! chan)
+            freq (map-frequency x)]
+        (set-freq! freq)))))
 
-(defn use-volume-chan
+(defn use-volume-chan!
   "Listen for values on chan and apply them to volume."
   [chan]
     (go (while true
-      (let [pos  (<! chan)
-            dist (dist-from-2d pos volume-pos)
-            vol  (/ (- dist 20) 100)]
+      (let [[x y z] (<! chan)
+            vol (map-volume y)]
         (set-volume! vol)))))
 
