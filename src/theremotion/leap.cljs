@@ -1,33 +1,40 @@
 (ns theremotion.leap
-  (:require [cljs.core.async :refer all]
-            [leapjs :as leapjs]))
+  (:require-macros [cljs.core.async.macros :refer [go]])
+  (:require [cljs.core.async :refer [chan tap mult put! <!]]))
+
+(def <left (chan))
+
+(def <right (chan))
 
 (def options {})
 
-(def listen (partial leapjs/loop options))
+(defn take-left [hands]
+  (first (filter
+           #(< (nth (.-palmPosition %) 0) 0)
+           hands)))
 
-(def frame-chan (chan))
+(defn take-right [hands]
+  (first (filter
+           #(> (nth (.-palmPosition %) 0) 0)
+           hands)))
 
-(def frame-mult (mult frame-chan))
+(defn frame->left [frame]
+  (take-left (.-hands frame)))
 
-(defn find-hand [id hands]
-  (first
-    (filter
-      (fn [hand] (= id (.-id hand)))
-      hands)))
+(defn frame->right [frame]
+  (take-right (.-hands frame)))
 
-(defn hand->chan [hand]
-  (let [id (.-id hand)
-        chan (chan)
-        fc (chan frame-mult)]
-    (while true
-      (let [frame (<!! fc)
-            hands (.-hands frame)
-            hand (find-hand id hands)]
-        (put! chan hand)))
-    (chan)))
+(defn process-frame! [frame]
+  (let [left (frame->left frame)
+        right (frame->right frame)]
+    (when left
+      ;(println :left)
+      (put! <left (.-palmPosition left)))
+    (when right
+      ;(println :right)
+      (put! <right (.-palmPosition right)))))
 
-(listen
-  (fn [frame]
-    (put! frame-chan frame)))
+(.loop js/Leap
+   options
+   process-frame!)
 
